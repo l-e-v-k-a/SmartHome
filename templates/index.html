@@ -24,17 +24,20 @@
     <div class="container">
         <form method="post">
             <table cellpadding="4">
+                {% for d in devices %}
+                {% set device = d.getInfo() %}
                 <tr>
                     <td valign="top">
                         <label class="switch">
-                            <input type="checkbox" id="tumbler1" name="light1" {{ status1 }}>
+                            <input type="checkbox" name={{ device['tag'] }} {% if device['status'] %}checked{% endif %}>
                             <span class="slider round"></span>
                         </label>
                     </td>
                     <td valign="top">
-                        <h2 class="switch-text">Свет 1</h2>
+                        <h2 class="switch-text">{{ device['name'] }}</h2>
                     </td>
                 </tr>
+                {% endfor %}
             </table>
             <input type="submit" value="Submit">
         </form>

@@ -1,11 +1,36 @@
 import socket
 from flask import Flask, render_template, redirect, request, session
 
-adminData = {"username": "admin", "password": "LetMeIn"}
-# devicesInfo = [["Свет 1", False], ["Свет 2", False]]
+
+class Device():
+    def __init__(self, tag, name, pin, status=False):
+        self.tag = tag
+        self.name = name
+        self.pin = pin
+        self.status = status
+
+    def setStatus(self, status):
+        self.status = status
+
+    def getInfo(self):
+        info = {
+            'tag': self.tag,
+            'name': self.name,
+            'pin': self.pin,
+            'status': self.status
+        }
+        return info
+
+
+light1 = Device('light1', 'Свет 1', 13)
+light2 = Device('light2', 'Свет 2', 14)
+boiler = Device('boiler', 'Чайник', 15)
+devices = [light1, light2, boiler]
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_key'
+adminData = {"username": "admin", "password": "LetMeIn"}
+
 
 @app.route('/', methods=['POST', 'GET'])  # Страница авторизации
 def login():
@@ -29,10 +54,11 @@ def index():
         if not session.get('is_auth'):  # Если ты не авторизован то иди авторизуйся
             return redirect("/")
     elif request.method == 'POST':
-        light1 = (request.form.get("light1") == "on")
-        print(light1)
-        status1 = "" + "checked"*light1
-    return render_template('index.html', status1=status1)
+        for d in devices:
+            status = (request.form.get(d.getInfo()['tag']) == "on")
+            d.setStatus(status)
+            print(d.getInfo()["status"]*'+' + (not d.getInfo()["status"])*'-')
+    return render_template('index.html', devices=devices)
 
 
 if __name__ == '__main__':
